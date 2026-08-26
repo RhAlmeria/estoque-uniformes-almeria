@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uniformes — Grupo Almeria</title>
+<style>
+  :root{
+    --bg:#f7f5f2; --card:#ffffff; --ink:#1f2430; --ink-soft:#5b6270;
+    --line:#e6e2db; --accent:#2f5233; --accent-soft:#e8efe6;
+    --warn:#b3541e; --warn-soft:#fbe9de; --bad:#a3312a; --bad-soft:#fbe4e1;
+    --ok:#2f6d3e; --ok-soft:#e6f2e6; --pend:#9a7a1f; --pend-soft:#faf1dc;
+    --info:#2b5f78; --info-soft:#e3eff3;
+    --radius:12px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);}
+  header{padding:22px 32px 14px;border-bottom:1px solid var(--line);background:var(--card);display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;}
+  header h1{margin:0 0 4px;font-size:21px;}
+  header p{margin:0;color:var(--ink-soft);font-size:13px;max-width:760px;line-height:1.5;}
+  #statusBadge{font-size:12px;padding:6px 12px;border-radius:8px;font-weight:600;white-space:nowrap;}
+  #statusBadge.ok{background:var(--ok-soft);color:var(--ok);}
+  #statusBadge.bad{background:var(--bad-soft);color:var(--bad);}
+  #statusBadge.loading{background:var(--pend-soft);color:var(--pend);}
+  nav{display:flex;gap:6px;padding:14px 32px 0;background:var(--card);border-bottom:1px solid var(--line);flex-wrap:wrap;position:sticky;top:0;z-index:5;}
+  nav button{border:none;background:transparent;padding:10px 16px;font-size:13.5px;font-weight:600;color:var(--ink-soft);cursor:pointer;border-radius:8px 8px 0 0;position:relative;}
+  nav button.active{color:var(--accent);background:var(--accent-soft);}
+  nav button .badge{display:inline-block;margin-left:6px;background:var(--pend);color:#fff;border-radius:10px;font-size:10.5px;padding:1px 6px;font-weight:700;}
+  main{padding:24px 32px 60px;max-width:1320px;margin:0 auto;}
+  .view{display:none;}
+  .view.active{display:block;}
+  .grid-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:22px;}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;}
+  .stat .num{font-size:26px;font-weight:700;}
+  .stat .lbl{font-size:12px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;margin-top:2px;}
+  .stat.warn .num{color:var(--warn);}
+  .stat.bad .num{color:var(--bad);}
+  .stat.pend .num{color:var(--pend);}
+  .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:flex-end;}
+  .filters .fld label{display:block;font-size:11.5px;font-weight:600;color:var(--ink-soft);margin-bottom:4px;}
+  select,input[type=text],input[type=number],input[type=date],input[type=email],input[type=password]{padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13.5px;background:#fff;color:var(--ink);}
+  table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;}
+  th,td{text-align:left;padding:10px 12px;font-size:13px;border-bottom:1px solid var(--line);}
+  th{background:#f1efe9;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);}
+  tr:last-child td{border-bottom:none;}
+  .tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;}
+  .tag.ok{background:var(--ok-soft);color:var(--ok);}
+  .tag.warn{background:var(--warn-soft);color:var(--warn);}
+  .tag.bad{background:var(--bad-soft);color:var(--bad);}
+  .tag.pend{background:var(--pend-soft);color:var(--pend);}
+  .tag.info{background:var(--info-soft);color:var(--info);}
+  .tag.neutral{background:#eee;color:#555;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:18px;}
+  .card h2{margin:0 0 4px;font-size:16px;}
+  .card .sub{color:var(--ink-soft);font-size:12.5px;margin-bottom:16px;}
+  .form-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:14px;}
+  .form-row label{display:block;font-size:12px;font-weight:600;color:var(--ink-soft);margin-bottom:5px;}
+  .form-row select,.form-row input{width:100%;}
+  button.primary{background:var(--accent);color:#fff;border:none;padding:10px 18px;border-radius:8px;font-size:13.5px;font-weight:600;cursor:pointer;}
+  button.primary:hover{opacity:.9;}
+  button.primary:disabled{opacity:.5;cursor:not-allowed;}
+  button.secondary{background:#fff;color:var(--accent);border:1px solid var(--accent);padding:8px 14px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;}
+  button.link{background:none;border:none;color:var(--accent);font-weight:600;font-size:12.5px;cursor:pointer;text-decoration:underline;padding:0;}
+  .kit-list{border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:14px;}
+  .kit-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--line);font-size:13.5px;gap:10px;flex-wrap:wrap;}
+  .kit-item:last-child{border-bottom:none;}
+  .kit-item .qty{display:flex;align-items:center;gap:8px;}
+  .kit-item input[type=number]{width:64px;}
+  .kit-item .stockinfo{font-size:11.5px;color:var(--ink-soft);}
+  .empty{color:var(--ink-soft);font-size:13px;padding:14px;text-align:center;}
+  .note{font-size:12px;color:var(--ink-soft);margin-top:8px;}
+  .banner{background:var(--pend-soft);color:var(--pend);border:1px solid #e9d38f;border-radius:10px;padding:12px 16px;font-size:13px;margin-bottom:18px;}
+  .banner.bad{background:var(--bad-soft);color:var(--bad);border-color:#e6b3af;}
+  .banner.info{background:var(--info-soft);color:var(--info);border-color:#bcd6e0;}
+  .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
+  .rules-list{margin:0;padding-left:0;list-style:none;}
+  .rules-list li{padding:8px 0 8px 26px;position:relative;font-size:13.5px;border-bottom:1px solid var(--line);}
+  .rules-list li:last-child{border-bottom:none;}
+  .rules-list li:before{content:"✓";position:absolute;left:0;top:8px;color:var(--accent);font-weight:700;}
+  .chart-wrap{display:flex;flex-direction:column;gap:14px;}
+  .chart-row{display:grid;grid-template-columns:170px 1fr 46px;align-items:center;gap:10px;}
+  .chart-row .chart-lbl{font-size:12.5px;color:var(--ink-soft);font-weight:600;}
+  .chart-row .chart-track{background:#efece5;border-radius:6px;height:16px;overflow:hidden;}
+  .chart-row .chart-fill{height:100%;border-radius:6px;}
+  .chart-row .chart-num{font-size:13px;font-weight:700;text-align:right;}
+  .pend-group{border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:12px;}
+  .pend-group .pg-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
+  .pend-group .pg-title{font-weight:700;font-size:14px;}
+  .pend-group .pg-sub{font-size:12px;color:var(--ink-soft);}
+  .checkline{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-soft);margin-top:8px;}
+  .itemline{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:8px 0;border-bottom:1px dashed var(--line);font-size:13px;}
+  .itemline:last-child{border-bottom:none;}
+  .itemline .left{display:flex;align-items:center;gap:8px;}
+  .itemline .stockinfo{font-size:11px;color:var(--ink-soft);}
+  .itemline .right{display:flex;align-items:center;gap:6px;}
+  .itemline input[type=number]{width:56px;}
+
+  #loginScreen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px;}
+  #loginScreen.hidden{display:none;}
+  .login-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:32px 30px;width:340px;max-width:100%;box-shadow:0 6px 24px rgba(0,0,0,.08);}
+  .login-card h1{margin:0 0 6px;font-size:19px;}
+  .login-card p{margin:0 0 20px;color:var(--ink-soft);font-size:12.5px;line-height:1.5;}
+  .login-card label{display:block;font-size:12px;font-weight:600;color:var(--ink-soft);margin:12px 0 5px;}
+  .login-card input{width:100%;}
+  .login-card button.primary{width:100%;margin-top:18px;}
+  .login-err{color:var(--bad);font-size:12.5px;margin-top:10px;min-height:16px;}
+  #appRoot.hidden{display:none;}
+  .userbar{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--ink-soft);flex-wrap:wrap;justify-content:flex-end;}
+  .userbar button{white-space:nowrap;}
+  .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:90;padding:20px;}
+  .modal-backdrop.hidden{display:none;}
+  .modal-box{background:var(--card);border-radius:var(--radius);padding:26px;width:640px;max-width:100%;max-height:88vh;overflow:auto;}
+  .modal-box h2{margin-top:0;}
+  .userrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);flex-wrap:wrap;}
+  .userrow:last-child{border-bottom:none;}
+  .userrow .uinfo{font-size:13px;}
+  .userrow .uinfo .uemail{color:var(--ink-soft);font-size:11.5px;}
+  .userrow .uactions{display:flex;gap:6px;flex-wrap:wrap;}
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div class="login-card">
+    <h1>👕 Uniformes — Grupo Almeria</h1>
+    <p>Entre com seu e-mail e senha para acessar o estoque, os kits e as pendências. Sem acesso ainda? Fale com o RH/DP.</p>
+    <label>E-mail</label>
+    <input type="email" id="loginEmail" placeholder="seu.email@grupoalmeria.com.br" autocomplete="username">
+    <label>Senha</label>
+    <input type="password" id="loginSenha" placeholder="senha" autocomplete="current-password">
+    <button class="primary" id="btnLogin">Entrar</button>
+    <div class="login-err" id="loginErr"></div>
+  </div>
+</div>
+
+<div id="appRoot" class="hidden">
+
+<header>
+  <div>
+    <h1>👕 Uniformes — Grupo Almeria</h1>
+    <p>Estoque, kits por função/unidade, contratação, rescisão e pendências item a item. Dados salvos direto na planilha (Google Sheets) — todos que acessarem este link veem e registram na mesma base, em tempo real.</p>
+  </div>
+  <div>
+    <div class="userbar">
+      <span id="userInfo"></span>
+      <button class="secondary" id="btnGerenciarAcessos" style="display:none;">Gerenciar acessos</button>
+      <button class="secondary" id="btnSair">Sair</button>
+    </div>
+    <div style="text-align:right;margin-top:8px;"><span id="statusBadge" class="loading">Carregando dados…</span></div>
+  </div>
+</header>
+
+<nav id="tabs">
+  <button data-view="painel" class="active">Painel</button>
+  <button data-view="estoque">Estoque</button>
+  <button data-view="catalogo">Catálogo</button>
+  <button data-view="contratacao">Contratação</button>
+  <button data-view="rescisao">Rescisão</button>
+  <button data-view="pendencias">Pendências <span class="badge" id="badgePend" style="display:none;">0</span></button>
+  <button data-view="mov">Movimentações</button>
+  <button data-view="colaboradores">Colaboradores</button>
+</nav>
+
+<main>
+
+  <div class="view active" id="view-painel">
+    <div id="painelBanner"></div>
+    <div class="grid-stats" id="painelStats"></div>
+
+    <div class="card">
+      <h2>Pendências em aberto</h2>
+      <div class="sub">Colaboradores aguardando entrega de kit ou devolução na rescisão (inclui entregas parciais por falta de estoque).</div>
+      <div class="chart-wrap" id="painelChart"></div>
+    </div>
+
+    <div class="card">
+      <h2>Itens abaixo do estoque mínimo</h2>
+      <div class="sub">Peças que precisam de reposição com prioridade.</div>
+      <table><thead><tr><th>Peça</th><th>Unidade</th><th>Cor</th><th>Tamanho</th><th>Saldo</th><th>Mínimo</th></tr></thead>
+      <tbody id="painelBaixoEstoque"></tbody></table>
+    </div>
+
+    <div class="card">
+      <h2>Regras gerais de uniforme</h2>
+      <div class="sub">Vale para todas as unidades, salvo exceção indicada.</div>
+      <ul class="rules-list">
+        <li>Troca de uniforme a cada 1 (um) ano, contado a partir da data de entrega/admissão.</li>
+        <li>Toda entrega de kit deve gerar recibo assinado pelo colaborador (registrado aqui como "Entregue").</li>
+        <li>Toda devolução na rescisão deve gerar recibo de devolução, mesmo quando houver itens não devolvidos.</li>
+        <li>Se não houver estoque suficiente na entrega, entregue o que tiver e marque só isso — o restante vira pendência automática na aba "Pendências" para entregar assim que repor.</li>
+        <li>Itens não devolvidos na rescisão ficam como pendência e devem ser cobrados/descontados conforme a política de RH.</li>
+        <li>Uniformes do Izzi (Wine Garden) estão em atualização — catálogo e estoque ainda pendentes. Consulte o RH antes de qualquer entrega dessa unidade.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="view" id="view-estoque">
+    <div class="filters">
+      <div class="fld"><label>Unidade</label><select id="fEstUnidade"><option value="">Todas</option></select></div>
+      <div class="fld"><label>Cor</label><select id="fEstCor"><option value="">Todas</option></select></div>
+      <div class="fld"><label>Buscar peça</label><input type="text" id="fEstBusca" placeholder="nome da peça"></div>
+    </div>
+    <table><thead><tr><th>Peça</th><th>Unidade</th><th>Cor</th><th>Tamanho</th><th>Saldo Atual</th><th>Mínimo</th><th>Status</th><th>Obs.</th></tr></thead>
+    <tbody id="tblEstoque"></tbody></table>
+  </div>
+
+  <div class="view" id="view-catalogo">
+    <div class="filters">
+      <div class="fld"><label>Marca/Linha</label><select id="fCatMarca"><option value="">Todas</option></select></div>
+      <div class="fld"><label>Buscar peça</label><input type="text" id="fCatBusca" placeholder="nome da peça"></div>
+    </div>
+    <table><thead><tr><th>ID</th><th>Peça</th><th>Categoria</th><th>Marca/Linha</th><th>Unidades</th><th>Tamanhos</th></tr></thead>
+    <tbody id="tblCatalogo"></tbody></table>
+  </div>
+
+  <div class="view" id="view-contratacao">
+    <div class="card">
+      <h2>Registrar contratação — novo colaborador</h2>
+      <div class="sub">Selecione função e unidade: o kit padrão aparece automaticamente com as quantidades oficiais, item por item. Isso cria uma pendência de entrega — confirme item a item na aba "Pendências" (o que não tiver em estoque fica pendente sozinho, sem travar o resto do kit).</div>
+      <div class="form-row">
+        <div><label>Nome completo</label><input type="text" id="entColaborador" placeholder="Nome completo do colaborador"></div>
+        <div><label>Função</label><select id="entFuncao"><option value="">Selecione</option></select></div>
+        <div><label>Unidade</label><select id="entUnidade"><option value="">Selecione</option></select></div>
+        <div><label>Tamanho (uniforme)</label><input type="text" id="entTamanho" placeholder="ex: M, 40"></div>
+        <div><label>Data de início</label><input type="date" id="entDataInicio"></div>
+      </div>
+      <div id="entKitArea" class="empty">Selecione função e unidade para ver o kit padrão.</div>
+      <div class="form-row"><div style="grid-column:1/-1"><label>Observações (opcional)</label><input type="text" id="entObs" placeholder="ex: substituição de peça danificada"></div></div>
+      <button class="primary" id="btnRegistrarPendEntrega" disabled>Registrar pendência de entrega</button>
+      <div class="note" id="entMsg"></div>
+      <div class="checkline">☑ Depois de registrar, vá até a aba "Pendências" para marcar item a item o que já foi entregue e aplicar o recibo.</div>
+    </div>
+  </div>
+
+  <div class="view" id="view-rescisao">
+    <div class="card">
+      <h2>Registrar rescisão / desligamento</h2>
+      <div class="sub">Informe o colaborador que está saindo. O sistema sugere os itens esperados de volta com base no kit da função/unidade — ajuste se necessário. Confirme item a item na aba "Pendências" conforme os itens forem devolvidos.</div>
+      <div class="form-row">
+        <div><label>Nome completo</label><input type="text" id="rscColaborador" placeholder="Nome completo do colaborador"></div>
+        <div><label>Função</label><select id="rscFuncao"><option value="">Selecione</option></select></div>
+        <div><label>Unidade</label><select id="rscUnidade"><option value="">Selecione</option></select></div>
+        <div><label>Tamanho (uniforme)</label><input type="text" id="rscTamanho" placeholder="ex: M, 40"></div>
+        <div><label>Data de desligamento</label><input type="date" id="rscDataFim"></div>
+      </div>
+      <div id="rscKitArea" class="empty">Selecione função e unidade para ver os itens esperados de volta.</div>
+      <div class="form-row"><div style="grid-column:1/-1"><label>Observações (opcional)</label><input type="text" id="rscObs" placeholder="ex: item com dano"></div></div>
+      <button class="primary" id="btnRegistrarPendDevolucao" disabled>Registrar pendência de devolução</button>
+      <div class="note" id="rscMsg"></div>
+      <div class="checkline">☑ Depois de registrar, vá até a aba "Pendências" para marcar item a item o que já foi devolvido e aplicar o recibo.</div>
+    </div>
+  </div>
+
+  <div class="view" id="view-pendencias">
+    <div class="banner info">Marque só as peças que realmente foram entregues/devolvidas e ajuste a quantidade se for parcial (ex: pediu 2 e só tinha 1 no estoque). O que ficar desmarcado ou com quantidade menor continua pendente sozinho — não trava o resto do kit. Quem confirma é registrado automaticamente com o seu login.</div>
+    <div class="card">
+      <h2>Pendências de entrega (contratação)</h2>
+      <div id="listaPendEntrega"></div>
+    </div>
+    <div class="card">
+      <h2>Pendências de devolução (rescisão)</h2>
+      <div id="listaPendDevolucao"></div>
+    </div>
+  </div>
+
+  <div class="view" id="view-mov">
+    <div class="card">
+      <h2>Registrar movimentação manual</h2>
+      <div class="sub">Use para compra/reposição, perda, dano ou ajuste de contagem — não vinculado a contratação/rescisão.</div>
+      <div class="form-row">
+        <div><label>Direção</label><select id="ajDirecao"><option value="entrada">Entrada (soma no estoque)</option><option value="saida">Saída (retira do estoque)</option></select></div>
+        <div><label>Peça</label><select id="ajPeca"><option value="">Selecione</option></select></div>
+        <div><label>Tamanho</label><input type="text" id="ajTamanho" placeholder="ex: M, 40"></div>
+        <div><label>Quantidade</label><input type="number" id="ajQtd" min="1" value="1"></div>
+      </div>
+      <div class="form-row">
+        <div><label>Motivo</label><input type="text" id="ajMotivo" placeholder="ex: Compra/Reposicao, Perda, Ajuste de contagem"></div>
+        <div><label>Observações (opcional)</label><input type="text" id="ajObs" placeholder="detalhes"></div>
+      </div>
+      <button class="primary" id="btnAjusteManual">Registrar movimentação</button>
+      <div class="note" id="ajMsg"></div>
+    </div>
+
+    <div class="toolbar">
+      <div class="filters" style="margin-bottom:0;">
+        <div class="fld"><label>Competência</label><select id="fMovCompetencia"><option value="">Todas</option></select></div>
+        <div class="fld"><label>Buscar (colaborador, peça, tipo)</label><input type="text" id="fMovBusca" placeholder="buscar"></div>
+      </div>
+    </div>
+    <table><thead><tr><th>Data/Hora</th><th>Tipo</th><th>Peça</th><th>Unidade</th><th>Tamanho</th><th>Colaborador</th><th>Função</th><th>Qtd</th><th>Status</th><th>Registrado Por</th><th>Obs.</th></tr></thead>
+    <tbody id="tblMov"></tbody></table>
+  </div>
+
+  <div class="view" id="view-colaboradores">
+    <div class="filters">
+      <div class="fld"><label>Unidade</label><select id="fColUnidade"><option value="">Todas</option></select></div>
+      <div class="fld"><label>Mostrar</label><select id="fColStatus"><option value="ativos">Somente ativos</option><option value="todos">Todos</option></select></div>
+      <div class="fld"><label>Buscar nome</label><input type="text" id="fColBusca" placeholder="nome do colaborador"></div>
+    </div>
+    <table><thead><tr><th>Nome completo</th><th>Função</th><th>Unidade</th><th>Tamanho</th><th>Status</th><th>Admissão</th></tr></thead>
+    <tbody id="tblColaboradores"></tbody></table>
+  </div>
+
+</main>
+
+</div>
+
+<div class="modal-backdrop hidden" id="modalAcessos">
+  <div class="modal-box">
+    <h2>Gerenciar acessos</h2>
+    <div class="sub">Cadastre, edite, troque senha ou desative o acesso de quem usa este site. Só administradores veem esta tela.</div>
+    <div id="listaUsuarios"></div>
+    <hr style="margin:18px 0;border:none;border-top:1px solid var(--line);">
+    <h2 style="font-size:14px;">Novo usuário</h2>
+    <div class="form-row">
+      <div><label>Nome</label><input type="text" id="novoUsrNome" placeholder="Nome completo"></div>
+      <div><label>E-mail</label><input type="email" id="novoUsrEmail" placeholder="email@grupoalmeria.com.br"></div>
+      <div><label>Senha inicial</label><input type="password" id="novoUsrSenha" placeholder="mín. 6 caracteres"></div>
+      <div><label>Administrador?</label>
+        <select id="novoUsrAdmin">
+          <option value="nao">Não — só usa o site</option>
+          <option value="sim">Sim — também gerencia acessos</option>
+        </select>
+      </div>
+    </div>
+    <button class="primary" id="btnCriarUsuario">Criar usuário</button>
+    <div class="note" id="acessosMsg"></div>
+    <div style="text-align:right;margin-top:16px;"><button class="secondary" id="btnFecharAcessos">Fechar</button></div>
+  </div>
+</div>
+
+<script>
+/* ======================= CONFIGURAÇÃO ======================= */
+const CONFIG = {
+  API_URL: "https://script.google.com/macros/s/AKfycbxGewVXI1scKSPc-LUACP9_NLV0qb_L4X3C7FlCZpbQKiT1B9xVb8cAnQhe88jPPcHu3g/exec"
+};
+/* ============================================================= */
+
+const UNIDADES = [
+  { value: 'Casa Almeria - Noroeste', bucket: 'Casa Almeria' },
+  { value: 'Casa Almeria - Asa Sul', bucket: 'Casa Almeria' },
+  { value: 'Matri - Noroeste', bucket: 'Matri' },
+  { value: 'Beira Lago', bucket: 'Beira Lago' },
+  { value: 'CPD', bucket: 'Cozinha (CPD e Casa Almeria)' },
+  { value: 'CSC', bucket: 'CSC' },
+  { value: 'ASG - Qualquer Unidade', bucket: 'ASG' },
+  { value: 'Izzi (Wine Garden)', bucket: null }
+];
+const UNIDADES_MAP = {};
+UNIDADES.forEach(u => UNIDADES_MAP[u.value] = u);
+
+function bucketFor(unidadeValue, funcao){
+  if(funcao === 'ASG') return 'ASG';
+  if(funcao === 'Cozinha') return 'Cozinha (CPD e Casa Almeria)';
+  const u = UNIDADES_MAP[unidadeValue];
+  return u ? u.bucket : null;
+}
+function touca(unidadeValue, funcao){
+  return funcao === 'Cozinha' && unidadeValue === 'Casa Almeria - Noroeste';
+}
+
+let DATA = { catalogo: [], estoque: [], kits: [], movimentacoes: [], colaboradores: [] };
+
+function setStatus(kind, text){
+  const b = document.getElementById('statusBadge');
+  b.className = kind;
+  b.textContent = text;
+}
+async function apiGet(){
+  const res = await fetch(CONFIG.API_URL + '?action=data', { method: 'GET' });
+  const json = await res.json();
+  if(!json.ok) throw new Error(json.error || 'Erro desconhecido ao carregar dados.');
+  return json.data;
+}
+async function apiPost(payload){
+  const res = await fetch(CONFIG.API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload)
+  });
+  const json = await res.json();
+  if(!json.ok) throw new Error(json.error || 'Erro desconhecido ao salvar.');
+  return json;
+}
+async function carregarTudo(){
+  if(!CONFIG.API_URL){ setStatus('bad', 'API não configurada'); return; }
+  setStatus('loading', 'Carregando dados…');
+  try{
+    DATA = await apiGet();
+    setStatus('ok', 'Conectado à planilha ✓');
+    renderAll();
+  }catch(err){
+    setStatus('bad', 'Falha ao carregar: ' + err.message);
+  }
+}
+function num(v){ const n = Number(v); return isNaN(n) ? 0 : n; }
+function uniq(arr, key){ return [...new Set(arr.map(r=>r[key]).filter(v=>v!==undefined && v!==''))]; }
+function esc(v){ return (v===undefined||v===null) ? '' : String(v); }
+function hoje(){ return new Date().toISOString().slice(0,10); }
+
+/* ======================= LOGIN / SESSÃO ======================= */
+let CURRENT_USER = null;
+
+async function sha256Hex(texto){
+  const enc = new TextEncoder().encode(texto);
+  const buf = await crypto.subtle.digest('SHA-256', enc);
+  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+function salvarSessao(user){ sessionStorage.setItem('uniformesUser', JSON.stringify(user)); }
+function lerSessao(){
+  try{ const raw = sessionStorage.getItem('uniformesUser'); return raw ? JSON.parse(raw) : null; }
+  catch(e){ return null; }
+}
+function limparSessao(){ sessionStorage.removeItem('uniformesUser'); }
+
+function mostrarApp(){
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('appRoot').classList.remove('hidden');
+  document.getElementById('userInfo').textContent = 'Logado como ' + CURRENT_USER.nome;
+  document.getElementById('btnGerenciarAcessos').style.display = CURRENT_USER.administrador ? 'inline-block' : 'none';
+}
+function mostrarLogin(){
+  document.getElementById('appRoot').classList.add('hidden');
+  document.getElementById('loginScreen').classList.remove('hidden');
+}
+
+document.getElementById('btnLogin').addEventListener('click', fazerLogin);
+document.getElementById('loginSenha').addEventListener('keydown', e=>{ if(e.key==='Enter') fazerLogin(); });
+document.getElementById('loginEmail').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('loginSenha').focus(); });
+
+async function fazerLogin(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const senha = document.getElementById('loginSenha').value;
+  const err = document.getElementById('loginErr');
+  err.textContent = '';
+  if(!email || !senha){ err.textContent = 'Preencha e-mail e senha.'; return; }
+  document.getElementById('btnLogin').disabled = true;
+  err.textContent = 'Entrando…';
+  try{
+    const senhaHash = await sha256Hex(senha);
+    const resp = await apiPost({ action:'login', email, senhaHash });
+    CURRENT_USER = { email: resp.email, nome: resp.nome, administrador: resp.administrador };
+    salvarSessao(CURRENT_USER);
+    err.textContent = '';
+    document.getElementById('loginSenha').value = '';
+    mostrarApp();
+    carregarTudo();
+  }catch(e){
+    err.textContent = e.message;
+  }
+  document.getElementById('btnLogin').disabled = false;
+}
+document.getElementById('btnSair').addEventListener('click', ()=>{
+  limparSessao();
+  CURRENT_USER = null;
+  location.reload();
+});
+
+/* ======================= NAVEGAÇÃO ======================= */
+document.getElementById('tabs').addEventListener('click', (e)=>{
+  const btn = e.target.closest('button');
+  if(!btn) return;
+  ativarAba(btn.dataset.view);
+});
+function ativarAba(view){
+  document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('active', b.dataset.view===view));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-' + view).classList.add('active');
+}
+
+function renderAll(){
+  renderPainel();
+  renderEstoqueFiltros();
+  renderEstoqueTable();
+  renderCatalogoFiltros();
+  renderCatalogoTable();
+  renderFormFiltros();
+  renderPendEntrega();
+  renderPendDevolucao();
+  atualizarBadgePend();
+  renderMovFiltros();
+  renderMov();
+  renderColaboradoresFiltros();
+  renderColaboradores();
+}
+
+function agruparPendencias(status){
+  const mapa = {};
+  DATA.movimentacoes.filter(m=>m['Status']===status).forEach(m=>{
+    const key = m['Colaborador'] + '||' + m['Funcao'] + '||' + m['Unidade'];
+    if(!mapa[key]) mapa[key] = { colaborador:m['Colaborador'], funcao:m['Funcao'], unidade:m['Unidade'], tamanho:m['Tamanho'], itens:[] };
+    mapa[key].itens.push({ peca:m['Peca'], quantidade:num(m['Quantidade']), row:m['__row'], tamanho:m['Tamanho'] });
+  });
+  return Object.values(mapa);
+}
+function atualizarBadgePend(){
+  const total = agruparPendencias('Pendente Entrega').reduce((s,g)=>s+g.itens.length,0) +
+                agruparPendencias('Pendente Devolucao').reduce((s,g)=>s+g.itens.length,0);
+  const badge = document.getElementById('badgePend');
+  if(total>0){ badge.style.display='inline-block'; badge.textContent = total; }
+  else badge.style.display='none';
+}
+
+/* ======================= PAINEL ======================= */
+function renderPainel(){
+  const est = DATA.estoque;
+  const totalPecas = est.reduce((s,r)=>s+num(r['Saldo Atual']),0);
+  const baixo = est.filter(r=> num(r['Saldo Atual']) <= num(r['Estoque Minimo']) && num(r['Saldo Atual']) > 0);
+  const zerado = est.filter(r=> num(r['Saldo Atual']) <= 0);
+  const pendEnt = agruparPendencias('Pendente Entrega');
+  const pendDev = agruparPendencias('Pendente Devolucao');
+  const itensPendEnt = pendEnt.reduce((s,g)=>s+g.itens.length,0);
+  const itensPendDev = pendDev.reduce((s,g)=>s+g.itens.length,0);
+
+  document.getElementById('painelStats').innerHTML = `
+    <div class="stat"><div class="num">${totalPecas}</div><div class="lbl">Peças em estoque</div></div>
+    <div class="stat warn"><div class="num">${baixo.length}</div><div class="lbl">Abaixo do mínimo</div></div>
+    <div class="stat bad"><div class="num">${zerado.length}</div><div class="lbl">Zerados</div></div>
+    <div class="stat pend"><div class="num">${pendEnt.length}</div><div class="lbl">Pendências de entrega</div></div>
+    <div class="stat pend"><div class="num">${pendDev.length}</div><div class="lbl">Pendências de devolução</div></div>
+  `;
+  document.getElementById('painelBanner').innerHTML = '';
+
+  const maxVal = Math.max(itensPendEnt, itensPendDev, 1);
+  document.getElementById('painelChart').innerHTML = `
+    <div class="chart-row">
+      <div class="chart-lbl">Itens a entregar</div>
+      <div class="chart-track"><div class="chart-fill" style="width:${(itensPendEnt/maxVal*100)}%;background:var(--accent);"></div></div>
+      <div class="chart-num">${itensPendEnt}</div>
+    </div>
+    <div class="chart-row">
+      <div class="chart-lbl">Itens a devolver</div>
+      <div class="chart-track"><div class="chart-fill" style="width:${(itensPendDev/maxVal*100)}%;background:var(--warn);"></div></div>
+      <div class="chart-num">${itensPendDev}</div>
+    </div>
+  `;
+
+  const rows = [...baixo, ...zerado].sort((a,b)=> num(a['Saldo Atual']) - num(b['Saldo Atual']));
+  document.getElementById('painelBaixoEstoque').innerHTML = rows.length ? rows.map(r=>`
+    <tr><td>${esc(r['Peca'])}</td><td>${esc(r['Unidade'])}</td><td>${esc(r['Cor'])}</td><td>${esc(r['Tamanho'])}</td>
+    <td>${num(r['Saldo Atual'])}</td><td>${num(r['Estoque Minimo'])}</td></tr>
+  `).join('') : '<tr><td colspan="6" class="empty">Nenhum item abaixo do mínimo.</td></tr>';
+}
+
+/* ======================= ESTOQUE ======================= */
+function renderEstoqueFiltros(){
+  const uSel = document.getElementById('fEstUnidade');
+  const cSel = document.getElementById('fEstCor');
+  if(uSel.options.length<=1){
+    uniq(DATA.estoque,'Unidade').sort().forEach(u=>uSel.insertAdjacentHTML('beforeend', `<option value="${u}">${u}</option>`));
+    uniq(DATA.estoque,'Cor').sort().forEach(c=>cSel.insertAdjacentHTML('beforeend', `<option value="${c}">${c}</option>`));
+    [uSel,cSel,document.getElementById('fEstBusca')].forEach(el=>el.addEventListener('input', renderEstoqueTable));
+  }
+}
+function renderEstoqueTable(){
+  const u = document.getElementById('fEstUnidade').value;
+  const c = document.getElementById('fEstCor').value;
+  const q = document.getElementById('fEstBusca').value.toLowerCase();
+  const rows = DATA.estoque.filter(r=>
+    (!u || r['Unidade']===u) && (!c || r['Cor']===c) &&
+    (!q || String(r['Peca']||'').toLowerCase().includes(q))
+  );
+  document.getElementById('tblEstoque').innerHTML = rows.length ? rows.map(r=>{
+    const saldo = num(r['Saldo Atual']); const min = num(r['Estoque Minimo']);
+    let tag = 'ok', label='OK';
+    if(saldo<=0){ tag='bad'; label='Zerado'; } else if(saldo<=min){ tag='warn'; label='Baixo'; }
+    return `<tr><td>${esc(r['Peca'])}</td><td>${esc(r['Unidade'])}</td><td>${esc(r['Cor'])}</td><td>${esc(r['Tamanho'])}</td>
+    <td>${saldo}</td><td>${min}</td><td><span class="tag ${tag}">${label}</span></td><td>${esc(r['Observacoes'])}</td></tr>`;
+  }).join('') : '<tr><td colspan="8" class="empty">Nenhum item encontrado.</td></tr>';
+}
+
+/* ======================= CATÁLOGO ======================= */
+function renderCatalogoFiltros(){
+  const mSel = document.getElementById('fCatMarca');
+  if(mSel.options.length<=1){
+    uniq(DATA.catalogo,'Marca/Linha').sort().forEach(m=>mSel.insertAdjacentHTML('beforeend', `<option value="${m}">${m}</option>`));
+    [mSel,document.getElementById('fCatBusca')].forEach(el=>el.addEventListener('input', renderCatalogoTable));
+  }
+}
+function renderCatalogoTable(){
+  const m = document.getElementById('fCatMarca').value;
+  const q = document.getElementById('fCatBusca').value.toLowerCase();
+  const rows = DATA.catalogo.filter(r=> (!m || r['Marca/Linha']===m) && (!q || String(r['Nome da Peca']||'').toLowerCase().includes(q)));
+  document.getElementById('tblCatalogo').innerHTML = rows.length ? rows.map(r=>`
+    <tr><td>${esc(r['ID'])}</td><td>${esc(r['Nome da Peca'])}</td><td>${esc(r['Categoria'])}</td>
+    <td>${esc(r['Marca/Linha'])}</td><td>${esc(r['Unidades'])}</td><td>${esc(r['Tamanhos'])}</td></tr>
+  `).join('') : '<tr><td colspan="6" class="empty">Nenhum item encontrado.</td></tr>';
+}
+
+/* ======================= FORM COMUNS (Função / Unidade) ======================= */
+function renderFormFiltros(){
+  const funcoes = uniq(DATA.kits,'Funcao').sort();
+  [['entFuncao','entUnidade'],['rscFuncao','rscUnidade']].forEach(pair=>{
+    const fSel = document.getElementById(pair[0]);
+    const uSel = document.getElementById(pair[1]);
+    if(fSel.options.length<=1){
+      funcoes.forEach(f=>fSel.insertAdjacentHTML('beforeend', `<option value="${f}">${f}</option>`));
+      UNIDADES.forEach(u=>uSel.insertAdjacentHTML('beforeend', `<option value="${u.value}">${u.value}</option>`));
+    }
+  });
+  if(!document.getElementById('entFuncao').dataset.bound){
+    ['entFuncao','entUnidade'].forEach(id=>document.getElementById(id).addEventListener('change', renderKitEntrega));
+    document.getElementById('entColaborador').addEventListener('input', atualizarBotaoEntrega);
+    document.getElementById('btnRegistrarPendEntrega').addEventListener('click', confirmarPendenciaEntrega);
+    document.getElementById('entDataInicio').value = hoje();
+    document.getElementById('entFuncao').dataset.bound = '1';
+  }
+  if(!document.getElementById('rscFuncao').dataset.bound){
+    ['rscFuncao','rscUnidade'].forEach(id=>document.getElementById(id).addEventListener('change', renderKitRescisao));
+    document.getElementById('rscColaborador').addEventListener('input', atualizarBotaoRescisao);
+    document.getElementById('btnRegistrarPendDevolucao').addEventListener('click', confirmarPendenciaDevolucao);
+    document.getElementById('rscDataFim').value = hoje();
+    document.getElementById('rscFuncao').dataset.bound = '1';
+  }
+}
+
+function acharEstoquePorPeca(peca, tamanho){
+  const porPecaETamanho = DATA.estoque.find(r => r['Peca']===peca && tamanho && String(r['Tamanho'])===String(tamanho));
+  if(porPecaETamanho) return porPecaETamanho;
+  return DATA.estoque.find(r => r['Peca']===peca);
+}
+function montarKit(funcao, unidadeValue, tamanho){
+  const bucket = bucketFor(unidadeValue, funcao);
+  if(!bucket) return { bucket:null, itens:[] };
+  let itens = DATA.kits.filter(k=>k['Funcao']===funcao && k['Unidade_Marca']===bucket)
+    .map(k=>({ peca:k['Peca'], qtdPadrao:num(k['Quantidade Padrao'])||1, est: acharEstoquePorPeca(k['Peca'], tamanho) }));
+  if(touca(unidadeValue, funcao)){
+    itens.push({ peca:'Touca Branca', qtdPadrao:1, est: acharEstoquePorPeca('Touca Branca', tamanho) });
+  }
+  return { bucket, itens };
+}
+
+/* ======================= CONTRATAÇÃO ======================= */
+let kitAtualEntrega = [];
+function renderKitEntrega(){
+  const funcao = document.getElementById('entFuncao').value;
+  const unidade = document.getElementById('entUnidade').value;
+  const tamanho = document.getElementById('entTamanho').value.trim();
+  const area = document.getElementById('entKitArea');
+  kitAtualEntrega = [];
+  if(!funcao || !unidade){
+    area.className='empty'; area.textContent='Selecione função e unidade para ver o kit padrão.';
+    atualizarBotaoEntrega(); return;
+  }
+  const { bucket, itens } = montarKit(funcao, unidade, tamanho);
+  if(bucket===null){
+    area.className='empty'; area.innerHTML='Essa unidade ainda não tem kit padrão cadastrado (uniforme em atualização). Registre manualmente com o RH.';
+    atualizarBotaoEntrega(); return;
+  }
+  if(!itens.length){
+    area.className='empty'; area.innerHTML='Nenhum kit padrão cadastrado para essa combinação de função/unidade ainda.';
+    atualizarBotaoEntrega(); return;
+  }
+  area.className='kit-list';
+  area.innerHTML = itens.map((it,i)=>{
+    const saldo = it.est ? num(it.est['Saldo Atual']) : null;
+    const stockTxt = it.est ? `saldo atual: ${saldo}` : 'peça sem item cadastrado no Estoque';
+    return `<div class="kit-item" data-idx="${i}">
+      <span><input type="checkbox" class="kitChk" data-idx="${i}" checked> ${it.peca} <span class="stockinfo">(${stockTxt})</span></span>
+      <span class="qty">Qtd: <input type="number" min="1" class="kitQty" data-idx="${i}" value="${it.qtdPadrao}"></span>
+    </div>`;
+  }).join('');
+  kitAtualEntrega = itens;
+  atualizarBotaoEntrega();
+}
+function atualizarBotaoEntrega(){
+  const nome = document.getElementById('entColaborador').value.trim();
+  document.getElementById('btnRegistrarPendEntrega').disabled = !(nome && kitAtualEntrega.length);
+}
+async function confirmarPendenciaEntrega(){
+  const colaborador = document.getElementById('entColaborador').value.trim();
+  const funcao = document.getElementById('entFuncao').value;
+  const unidade = document.getElementById('entUnidade').value;
+  const tamanho = document.getElementById('entTamanho').value.trim();
+  const dataInicio = document.getElementById('entDataInicio').value;
+  const obs = document.getElementById('entObs').value.trim();
+  const msg = document.getElementById('entMsg');
+  const checks = document.querySelectorAll('#entKitArea .kitChk');
+  const itens = [];
+  checks.forEach(chk=>{
+    if(!chk.checked) return;
+    const idx = Number(chk.dataset.idx);
+    const info = kitAtualEntrega[idx];
+    const qtyInput = document.querySelector(`#entKitArea .kitQty[data-idx="${idx}"]`);
+    const qtd = Number(qtyInput.value) || 1;
+    itens.push({ peca: info.peca, quantidade: qtd, tamanho });
+  });
+  if(!itens.length){ msg.textContent = 'Selecione ao menos uma peça.'; return; }
+  document.getElementById('btnRegistrarPendEntrega').disabled = true;
+  msg.textContent = 'Salvando na planilha…';
+  try{
+    await apiPost({ action:'registrarPendenciaEntrega', colaborador, funcao, unidade, tamanho, dataInicio, observacoes: obs, itens, registradoPor: CURRENT_USER.nome });
+    msg.textContent = '✔ Pendência registrada. Vá até a aba "Pendências" para marcar item a item o que foi entregue.';
+    document.getElementById('entColaborador').value='';
+    document.getElementById('entTamanho').value='';
+    document.getElementById('entObs').value='';
+    await carregarTudo();
+    ativarAba('pendencias');
+  }catch(err){
+    msg.textContent = 'Erro ao salvar: ' + err.message;
+  }
+  atualizarBotaoEntrega();
+}
+
+/* ======================= RESCISÃO ======================= */
+let kitAtualRescisao = [];
+function renderKitRescisao(){
+  const funcao = document.getElementById('rscFuncao').value;
+  const unidade = document.getElementById('rscUnidade').value;
+  const tamanho = document.getElementById('rscTamanho').value.trim();
+  const area = document.getElementById('rscKitArea');
+  kitAtualRescisao = [];
+  if(!funcao || !unidade){
+    area.className='empty'; area.textContent='Selecione função e unidade para ver os itens esperados de volta.';
+    atualizarBotaoRescisao(); return;
+  }
+  const { bucket, itens } = montarKit(funcao, unidade, tamanho);
+  if(bucket===null || !itens.length){
+    area.className='empty'; area.innerHTML='Nenhum kit padrão cadastrado para essa combinação — informe os itens manualmente com o RH.';
+    atualizarBotaoRescisao(); return;
+  }
+  area.className='kit-list';
+  area.innerHTML = itens.map((it,i)=>`
+    <div class="kit-item" data-idx="${i}">
+      <span><input type="checkbox" class="rscChk" data-idx="${i}" checked> ${it.peca}</span>
+      <span class="qty">Qtd esperada: <input type="number" min="1" class="rscQty" data-idx="${i}" value="${it.qtdPadrao}"></span>
+    </div>`).join('');
+  kitAtualRescisao = itens;
+  atualizarBotaoRescisao();
+}
+function atualizarBotaoRescisao(){
+  const nome = document.getElementById('rscColaborador').value.trim();
+  document.getElementById('btnRegistrarPendDevolucao').disabled = !(nome && kitAtualRescisao.length);
+}
+async function confirmarPendenciaDevolucao(){
+  const colaborador = document.getElementById('rscColaborador').value.trim();
+  const funcao = document.getElementById('rscFuncao').value;
+  const unidade = document.getElementById('rscUnidade').value;
+  const tamanho = document.getElementById('rscTamanho').value.trim();
+  const dataFim = document.getElementById('rscDataFim').value;
+  const obs = document.getElementById('rscObs').value.trim();
+  const msg = document.getElementById('rscMsg');
+  const checks = document.querySelectorAll('#rscKitArea .rscChk');
+  const itens = [];
+  checks.forEach(chk=>{
+    if(!chk.checked) return;
+    const idx = Number(chk.dataset.idx);
+    const info = kitAtualRescisao[idx];
+    const qtyInput = document.querySelector(`#rscKitArea .rscQty[data-idx="${idx}"]`);
+    const qtd = Number(qtyInput.value) || 1;
+    itens.push({ peca: info.peca, quantidade: qtd, tamanho });
+  });
+  if(!itens.length){ msg.textContent = 'Selecione ao menos uma peça.'; return; }
+  document.getElementById('btnRegistrarPendDevolucao').disabled = true;
+  msg.textContent = 'Salvando na planilha…';
+  try{
+    await apiPost({ action:'registrarPendenciaDevolucao', colaborador, funcao, unidade, tamanho, dataFim, observacoes: obs, itens, registradoPor: CURRENT_USER.nome });
+    msg.textContent = '✔ Pendência registrada. Vá até a aba "Pendências" para marcar item a item o que foi devolvido.';
+    document.getElementById('rscColaborador').value='';
+    document.getElementById('rscTamanho').value='';
+    document.getElementById('rscObs').value='';
+    await carregarTudo();
+    ativarAba('pendencias');
+  }catch(err){
+    msg.textContent = 'Erro ao salvar: ' + err.message;
+  }
+  atualizarBotaoRescisao();
+}
+
+/* ======================= PENDÊNCIAS (checklist item a item) ======================= */
+function renderPendEntrega(){
+  const grupos = agruparPendencias('Pendente Entrega');
+  const el = document.getElementById('listaPendEntrega');
+  el.innerHTML = grupos.length ? grupos.map((g,gi)=>`
+    <div class="pend-group" data-tipo="entrega" data-gi="${gi}">
+      <div class="pg-head">
+        <div><div class="pg-title">${esc(g.colaborador)}</div><div class="pg-sub">${esc(g.funcao)} · ${esc(g.unidade)} · Tamanho: ${esc(g.tamanho)}</div></div>
+        <button class="primary btnConfirmarGrupo" data-tipo="entrega" data-gi="${gi}">Confirmar selecionados</button>
+      </div>
+      ${g.itens.map((it,ii)=>{
+        const est = acharEstoquePorPeca(it.peca, it.tamanho);
+        const saldo = est ? num(est['Saldo Atual']) : 0;
+        const semEstoque = saldo <= 0;
+        return `<div class="itemline">
+          <span class="left"><input type="checkbox" class="itChk" data-gi="${gi}" data-ii="${ii}" ${semEstoque?'':'checked'}>
+            ${esc(it.peca)} <span class="stockinfo">${semEstoque ? '(sem estoque agora)' : '(saldo atual: '+saldo+')'}</span></span>
+          <span class="right">pedido: ${it.quantidade} · entregar agora: <input type="number" class="itQty" data-gi="${gi}" data-ii="${ii}" min="0" max="${it.quantidade}" value="${Math.min(it.quantidade, Math.max(saldo,0))}"></span>
+        </div>`;
+      }).join('')}
+    </div>
+  `).join('') : '<div class="empty">Nenhuma pendência de entrega no momento.</div>';
+  el.querySelectorAll('.btnConfirmarGrupo').forEach(btn=>{
+    btn.addEventListener('click', ()=>confirmarGrupo('entrega', Number(btn.dataset.gi), grupos));
+  });
+}
+function renderPendDevolucao(){
+  const grupos = agruparPendencias('Pendente Devolucao');
+  const el = document.getElementById('listaPendDevolucao');
+  el.innerHTML = grupos.length ? grupos.map((g,gi)=>`
+    <div class="pend-group" data-tipo="devolucao" data-gi="${gi}">
+      <div class="pg-head">
+        <div><div class="pg-title">${esc(g.colaborador)}</div><div class="pg-sub">${esc(g.funcao)} · ${esc(g.unidade)} · Tamanho: ${esc(g.tamanho)}</div></div>
+        <button class="primary btnConfirmarGrupoDev" data-tipo="devolucao" data-gi="${gi}">Confirmar selecionados</button>
+      </div>
+      ${g.itens.map((it,ii)=>`
+        <div class="itemline">
+          <span class="left"><input type="checkbox" class="itChkDev" data-gi="${gi}" data-ii="${ii}" checked> ${esc(it.peca)}</span>
+          <span class="right">esperado: ${it.quantidade} · devolvido agora: <input type="number" class="itQtyDev" data-gi="${gi}" data-ii="${ii}" min="0" max="${it.quantidade}" value="${it.quantidade}"></span>
+        </div>`).join('')}
+    </div>
+  `).join('') : '<div class="empty">Nenhuma pendência de devolução no momento.</div>';
+  el.querySelectorAll('.btnConfirmarGrupoDev').forEach(btn=>{
+    btn.addEventListener('click', ()=>confirmarGrupo('devolucao', Number(btn.dataset.gi), grupos));
+  });
+}
+async function confirmarGrupo(tipo, gi, grupos){
+  const grupo = grupos[gi];
+  const chkClass = tipo==='entrega' ? '.itChk' : '.itChkDev';
+  const qtyClass = tipo==='entrega' ? '.itQty' : '.itQtyDev';
+  const itensConfirmar = [];
+  grupo.itens.forEach((it,ii)=>{
+    const chk = document.querySelector(`${chkClass}[data-gi="${gi}"][data-ii="${ii}"]`);
+    if(!chk || !chk.checked) return;
+    const qtyInput = document.querySelector(`${qtyClass}[data-gi="${gi}"][data-ii="${ii}"]`);
+    const qtd = Number(qtyInput.value) || 0;
+    if(qtd<=0) return;
+    itensConfirmar.push({ row: it.row, quantidadeConfirmada: qtd });
+  });
+  if(!itensConfirmar.length){ alert('Selecione ao menos um item com quantidade maior que zero.'); return; }
+  const action = tipo==='entrega' ? 'confirmarItensEntrega' : 'confirmarItensDevolucao';
+  try{
+    await apiPost({ action, itens: itensConfirmar, colaborador: grupo.colaborador, registradoPor: CURRENT_USER.nome });
+    await carregarTudo();
+    ativarAba('pendencias');
+  }catch(err){
+    alert('Erro ao confirmar: ' + err.message);
+  }
+}
+
+/* ======================= MOVIMENTAÇÕES ======================= */
+function renderMovFiltros(){
+  const pecaSel = document.getElementById('ajPeca');
+  if(pecaSel.options.length<=1){
+    uniq(DATA.estoque,'Peca').sort().forEach(p=>pecaSel.insertAdjacentHTML('beforeend', `<option value="${p}">${p}</option>`));
+    document.getElementById('btnAjusteManual').addEventListener('click', registrarAjusteManual);
+  }
+  const compSel = document.getElementById('fMovCompetencia');
+  const jaTinha = [...compSel.querySelectorAll('option')].map(o=>o.value);
+  const comps = [...new Set(DATA.movimentacoes.map(m=>String(m['Timestamp']||'').slice(0,7)).filter(Boolean))].sort().reverse();
+  comps.forEach(c=>{
+    if(jaTinha.includes(c)) return;
+    const parts = c.split('-');
+    const label = parts.length===2 ? (parts[1] + '/' + parts[0]) : c;
+    compSel.insertAdjacentHTML('beforeend', `<option value="${c}">${label}</option>`);
+  });
+  if(!compSel.dataset.bound){
+    [compSel, document.getElementById('fMovBusca')].forEach(el=>el.addEventListener('input', renderMov));
+    compSel.dataset.bound = '1';
+  }
+}
+async function registrarAjusteManual(){
+  const direcao = document.getElementById('ajDirecao').value;
+  const peca = document.getElementById('ajPeca').value;
+  const tamanho = document.getElementById('ajTamanho').value.trim();
+  const quantidade = Number(document.getElementById('ajQtd').value) || 0;
+  const motivo = document.getElementById('ajMotivo').value.trim();
+  const obs = document.getElementById('ajObs').value.trim();
+  const msg = document.getElementById('ajMsg');
+  if(!peca || !quantidade){ msg.textContent = 'Selecione a peça e informe a quantidade.'; return; }
+  msg.textContent = 'Salvando na planilha…';
+  try{
+    await apiPost({ action:'ajusteManual', direcao, peca, tamanho, quantidade, motivo, observacoes: obs, registradoPor: CURRENT_USER.nome });
+    msg.textContent = '✔ Movimentação registrada.';
+    document.getElementById('ajTamanho').value='';
+    document.getElementById('ajMotivo').value='';
+    document.getElementById('ajObs').value='';
+    document.getElementById('ajQtd').value='1';
+    await carregarTudo();
+    ativarAba('mov');
+  }catch(err){
+    msg.textContent = 'Erro ao salvar: ' + err.message;
+  }
+}
+function renderMov(){
+  const comp = document.getElementById('fMovCompetencia').value;
+  const q = (document.getElementById('fMovBusca').value||'').toLowerCase();
+  const rows = [...DATA.movimentacoes].reverse().filter(r=>{
+    const compOk = !comp || String(r['Timestamp']||'').slice(0,7)===comp;
+    const buscaOk = !q || [r['Colaborador'],r['Peca'],r['Tipo']].some(v=>String(v||'').toLowerCase().includes(q));
+    return compOk && buscaOk;
+  });
+  document.getElementById('tblMov').innerHTML = rows.length ? rows.map(r=>{
+    const tipo = String(r['Tipo']||'');
+    const status = String(r['Status']||'');
+    let tag = 'ok';
+    if(/^Pendente/i.test(status)) tag = 'pend';
+    else if(/Parcial/i.test(status)) tag = 'warn';
+    else if(/^Saida/i.test(tipo)) tag = 'bad';
+    return `<tr><td>${(r['Timestamp']||'').toString().replace('T',' ').slice(0,16)}</td>
+    <td>${esc(tipo)}</td><td>${esc(r['Peca'])}</td><td>${esc(r['Unidade'])}</td>
+    <td>${esc(r['Tamanho'])}</td><td>${esc(r['Colaborador'])}</td><td>${esc(r['Funcao'])}</td><td>${esc(r['Quantidade'])}</td>
+    <td><span class="tag ${tag}">${esc(status)}</span></td><td>${esc(r['Registrado Por'])}</td><td>${esc(r['Observacoes'])}</td></tr>`;
+  }).join('') : '<tr><td colspan="11" class="empty">Nenhuma movimentação registrada ainda.</td></tr>';
+}
+
+/* ======================= COLABORADORES ======================= */
+function renderColaboradoresFiltros(){
+  const uSel = document.getElementById('fColUnidade');
+  if(uSel.options.length<=1){
+    uniq(DATA.colaboradores,'Unidade').sort().forEach(u=>uSel.insertAdjacentHTML('beforeend', `<option value="${u}">${u}</option>`));
+    [uSel, document.getElementById('fColStatus'), document.getElementById('fColBusca')].forEach(el=>el.addEventListener('input', renderColaboradores));
+  }
+}
+function renderColaboradores(){
+  const u = document.getElementById('fColUnidade').value;
+  const somenteAtivos = document.getElementById('fColStatus').value === 'ativos';
+  const q = document.getElementById('fColBusca').value.toLowerCase();
+  const rows = DATA.colaboradores.filter(r=>
+    (!u || r['Unidade']===u) &&
+    (!somenteAtivos || String(r['Status']||'').indexOf('Ativo')===0) &&
+    (!q || String(r['Nome']||'').toLowerCase().includes(q))
+  );
+  document.getElementById('tblColaboradores').innerHTML = rows.length ? rows.map(r=>{
+    const status = String(r['Status']||'');
+    const tag = status.indexOf('Ativo')===0 ? 'ok' : (status.indexOf('aguardando')>-1 || status.indexOf('pendente')>-1 ? 'pend' : 'neutral');
+    return `<tr><td>${esc(r['Nome'])}</td><td>${esc(r['Funcao'])}</td><td>${esc(r['Unidade'])}</td><td>${esc(r['Tamanho'])}</td>
+    <td><span class="tag ${tag}">${esc(status)}</span></td><td>${(r['DataAdmissao']||'').toString().slice(0,10)}</td></tr>`;
+  }).join('') : '<tr><td colspan="6" class="empty">Nenhum colaborador encontrado.</td></tr>';
+}
+
+/* ======================= GERENCIAR ACESSOS ======================= */
+document.getElementById('btnGerenciarAcessos').addEventListener('click', abrirModalAcessos);
+document.getElementById('btnFecharAcessos').addEventListener('click', ()=>{
+  document.getElementById('modalAcessos').classList.add('hidden');
+});
+document.getElementById('btnCriarUsuario').addEventListener('click', criarUsuarioHandler);
+
+async function abrirModalAcessos(){
+  document.getElementById('modalAcessos').classList.remove('hidden');
+  document.getElementById('acessosMsg').textContent = 'Carregando…';
+  try{
+    const resp = await apiPost({ action:'listarUsuarios', solicitanteEmail: CURRENT_USER.email });
+    renderListaUsuarios(resp.usuarios);
+    document.getElementById('acessosMsg').textContent = '';
+  }catch(e){
+    document.getElementById('acessosMsg').textContent = 'Erro: ' + e.message;
+  }
+}
+function renderListaUsuarios(usuarios){
+  const el = document.getElementById('listaUsuarios');
+  el.innerHTML = usuarios.length ? usuarios.map(u=>`
+    <div class="userrow" data-email="${esc(u.email)}">
+      <div class="uinfo">
+        <div>${esc(u.nome)} ${u.administrador?'<span class="tag info">admin</span>':''} ${u.ativo?'':'<span class="tag bad">desativado</span>'}</div>
+        <div class="uemail">${esc(u.email)}</div>
+      </div>
+      <div class="uactions">
+        <button class="secondary btnTrocarSenha" data-email="${esc(u.email)}">Trocar senha</button>
+        <button class="secondary btnToggleAdmin" data-email="${esc(u.email)}" data-admin="${u.administrador?'1':'0'}">${u.administrador?'Tirar admin':'Tornar admin'}</button>
+        <button class="secondary btnToggleAtivo" data-email="${esc(u.email)}" data-ativo="${u.ativo?'1':'0'}">${u.ativo?'Desativar':'Reativar'}</button>
+      </div>
+    </div>
+  `).join('') : '<div class="empty">Nenhum usuário cadastrado.</div>';
+
+  el.querySelectorAll('.btnTrocarSenha').forEach(b=>b.addEventListener('click', ()=>trocarSenhaHandler(b.dataset.email)));
+  el.querySelectorAll('.btnToggleAdmin').forEach(b=>b.addEventListener('click', ()=>toggleAdminHandler(b.dataset.email, b.dataset.admin==='1')));
+  el.querySelectorAll('.btnToggleAtivo').forEach(b=>b.addEventListener('click', ()=>toggleAtivoHandler(b.dataset.email, b.dataset.ativo==='1')));
+}
+async function criarUsuarioHandler(){
+  const nome = document.getElementById('novoUsrNome').value.trim();
+  const email = document.getElementById('novoUsrEmail').value.trim();
+  const senha = document.getElementById('novoUsrSenha').value;
+  const administrador = document.getElementById('novoUsrAdmin').value === 'sim';
+  const msg = document.getElementById('acessosMsg');
+  if(!nome || !email || !senha){ msg.textContent = 'Preencha nome, e-mail e senha.'; return; }
+  if(senha.length < 6){ msg.textContent = 'A senha precisa ter pelo menos 6 caracteres.'; return; }
+  msg.textContent = 'Criando…';
+  try{
+    const senhaHash = await sha256Hex(senha);
+    await apiPost({ action:'criarUsuario', solicitanteEmail: CURRENT_USER.email, nome, email, senhaHash, administrador });
+    document.getElementById('novoUsrNome').value='';
+    document.getElementById('novoUsrEmail').value='';
+    document.getElementById('novoUsrSenha').value='';
+    msg.textContent = '✔ Usuário criado.';
+    abrirModalAcessos();
+  }catch(e){
+    msg.textContent = 'Erro: ' + e.message;
+  }
+}
+async function trocarSenhaHandler(email){
+  const nova = prompt('Nova senha para ' + email + ' (mín. 6 caracteres):');
+  if(!nova) return;
+  if(nova.length < 6){ alert('A senha precisa ter pelo menos 6 caracteres.'); return; }
+  try{
+    const novaSenhaHash = await sha256Hex(nova);
+    await apiPost({ action:'trocarSenha', solicitanteEmail: CURRENT_USER.email, email, novaSenhaHash });
+    alert('Senha alterada.');
+  }catch(e){
+    alert('Erro: ' + e.message);
+  }
+}
+async function toggleAdminHandler(email, eraAdmin){
+  try{
+    await apiPost({ action:'editarUsuario', solicitanteEmail: CURRENT_USER.email, email, administrador: !eraAdmin });
+    abrirModalAcessos();
+  }catch(e){
+    alert('Erro: ' + e.message);
+  }
+}
+async function toggleAtivoHandler(email, estavaAtivo){
+  if(estavaAtivo && email.toLowerCase() === CURRENT_USER.email.toLowerCase()){
+    alert('Você não pode desativar o próprio acesso.');
+    return;
+  }
+  try{
+    await apiPost({ action:'definirStatusUsuario', solicitanteEmail: CURRENT_USER.email, email, ativo: !estavaAtivo });
+    abrirModalAcessos();
+  }catch(e){
+    alert('Erro: ' + e.message);
+  }
+}
+
+/* ======================= INÍCIO ======================= */
+(function iniciarSessao(){
+  const s = lerSessao();
+  if(s && s.email){
+    CURRENT_USER = s;
+    mostrarApp();
+    carregarTudo();
+  } else {
+    mostrarLogin();
+  }
+})();
+</script>
+</body>
+</html>
