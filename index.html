@@ -30,7 +30,8 @@
   .view{display:none;}
   .view.active{display:block;}
   .grid-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:22px;}
-  .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;cursor:pointer;transition:transform .1s,box-shadow .1s;}
+  .stat:hover{box-shadow:0 3px 10px rgba(0,0,0,.08);transform:translateY(-1px);}
   .stat .num{font-size:26px;font-weight:700;}
   .stat .lbl{font-size:12px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;margin-top:2px;}
   .stat.warn .num{color:var(--warn);}
@@ -156,6 +157,7 @@
   <button data-view="catalogo">Catálogo</button>
   <button data-view="contratacao">Contratação</button>
   <button data-view="rescisao">Rescisão</button>
+  <button data-view="troca">Solicitações de Troca</button>
   <button data-view="pendencias">Pendências <span class="badge" id="badgePend" style="display:none;">0</span></button>
   <button data-view="mov">Movimentações</button>
   <button data-view="colaboradores">Colaboradores</button>
@@ -184,7 +186,7 @@
       <h2>Regras gerais de uniforme</h2>
       <div class="sub">Vale para todas as unidades, salvo exceção indicada.</div>
       <ul class="rules-list">
-        <li>Troca de uniforme a cada 1 (um) ano, contado a partir da data de entrega/admissão.</li>
+        <li>Troca de uniforme a cada 1 (um) ano, contado a partir da data de entrega/admissão — exceto para as equipes de Cozinha e Bar, que é a cada 6 (seis) meses.</li>
         <li>Toda entrega de kit deve gerar recibo assinado pelo colaborador (registrado aqui como "Entregue").</li>
         <li>Toda devolução na rescisão deve gerar recibo de devolução, mesmo quando houver itens não devolvidos.</li>
         <li>Se não houver estoque suficiente na entrega, entregue o que tiver e marque só isso — o restante vira pendência automática na aba "Pendências" para entregar assim que repor.</li>
@@ -198,6 +200,7 @@
     <div class="filters">
       <div class="fld"><label>Unidade</label><select id="fEstUnidade"><option value="">Todas</option></select></div>
       <div class="fld"><label>Cor</label><select id="fEstCor"><option value="">Todas</option></select></div>
+      <div class="fld"><label>Status</label><select id="fEstStatus"><option value="">Todos</option><option value="baixo">Abaixo do mínimo</option><option value="zerado">Zerado</option></select></div>
       <div class="fld"><label>Buscar peça</label><input type="text" id="fEstBusca" placeholder="nome da peça"></div>
     </div>
     <table><thead><tr><th>Peça</th><th>Unidade</th><th>Cor</th><th>Tamanho</th><th>Saldo Atual</th><th>Mínimo</th><th>Status</th><th>Obs.</th></tr></thead>
@@ -221,7 +224,7 @@
         <div><label>Nome completo</label><input type="text" id="entColaborador" placeholder="Nome completo do colaborador"></div>
         <div><label>Função</label><select id="entFuncao"><option value="">Selecione</option></select></div>
         <div><label>Unidade</label><select id="entUnidade"><option value="">Selecione</option></select></div>
-        <div><label>Tamanho (uniforme)</label><input type="text" id="entTamanho" placeholder="ex: M, 40"></div>
+        <div><label>Tamanho de referência (opcional)</label><input type="text" id="entTamanho" placeholder="preenche o kit, editável por peça"></div>
         <div><label>Data de início</label><input type="date" id="entDataInicio"></div>
       </div>
       <div id="entKitArea" class="empty">Selecione função e unidade para ver o kit padrão.</div>
@@ -240,7 +243,7 @@
         <div><label>Nome completo</label><input type="text" id="rscColaborador" placeholder="Nome completo do colaborador"></div>
         <div><label>Função</label><select id="rscFuncao"><option value="">Selecione</option></select></div>
         <div><label>Unidade</label><select id="rscUnidade"><option value="">Selecione</option></select></div>
-        <div><label>Tamanho (uniforme)</label><input type="text" id="rscTamanho" placeholder="ex: M, 40"></div>
+        <div><label>Tamanho de referência (opcional)</label><input type="text" id="rscTamanho" placeholder="preenche o kit, editável por peça"></div>
         <div><label>Data de desligamento</label><input type="date" id="rscDataFim"></div>
       </div>
       <div id="rscKitArea" class="empty">Selecione função e unidade para ver os itens esperados de volta.</div>
@@ -248,6 +251,38 @@
       <button class="primary" id="btnRegistrarPendDevolucao" disabled>Registrar pendência de devolução</button>
       <div class="note" id="rscMsg"></div>
       <div class="checkline">☑ Depois de registrar, vá até a aba "Pendências" para marcar item a item o que já foi devolvido e aplicar o recibo.</div>
+    </div>
+  </div>
+
+  <div class="view" id="view-troca">
+    <div class="card">
+      <h2>Solicitação de troca/reposição de uniforme</h2>
+      <div class="sub">Para colaboradores já ativos — peça danificada, perdida, tamanho errado ou troca pelo prazo de uso (1 ano geral, 6 meses para Cozinha e Bar). Isso gera uma pendência de entrega que aparece na aba "Pendências" e fica no histórico do colaborador.</div>
+      <div class="form-row">
+        <div><label>Colaborador</label><select id="trcColaborador"><option value="">Selecione</option></select></div>
+        <div><label>Peça</label><select id="trcPeca"><option value="">Selecione</option></select></div>
+        <div><label>Tamanho</label><input type="text" id="trcTamanho" placeholder="ex: M, 40"></div>
+        <div><label>Quantidade</label><input type="number" id="trcQtd" min="1" value="1"></div>
+      </div>
+      <div class="form-row">
+        <div><label>Motivo</label><select id="trcMotivo">
+          <option value="Prazo de uso">Prazo de uso (1 ano / 6 meses)</option>
+          <option value="Dano/desgaste">Dano/desgaste</option>
+          <option value="Perda">Perda</option>
+          <option value="Troca de tamanho">Troca de tamanho</option>
+          <option value="Outro">Outro</option>
+        </select></div>
+        <div><label>Data prevista de entrega</label><input type="date" id="trcDataPrevista"></div>
+      </div>
+      <div class="form-row"><div style="grid-column:1/-1"><label>Observações (opcional)</label><input type="text" id="trcObs" placeholder="detalhes"></div></div>
+      <button class="primary" id="btnRegistrarTroca">Registrar solicitação de troca</button>
+      <div class="note" id="trcMsg"></div>
+      <div class="checkline">☑ Depois de registrar, ela aparece na aba "Pendências" para confirmar a entrega quando o item for repassado ao colaborador.</div>
+    </div>
+    <div class="card">
+      <h2>Histórico de solicitações de troca</h2>
+      <table><thead><tr><th>Data prevista</th><th>Colaborador</th><th>Peça</th><th>Tam.</th><th>Qtd</th><th>Motivo</th><th>Status</th></tr></thead>
+      <tbody id="tblTroca"></tbody></table>
     </div>
   </div>
 
@@ -294,15 +329,30 @@
   <div class="view" id="view-colaboradores">
     <div class="filters">
       <div class="fld"><label>Unidade</label><select id="fColUnidade"><option value="">Todas</option></select></div>
-      <div class="fld"><label>Mostrar</label><select id="fColStatus"><option value="ativos">Somente ativos</option><option value="todos">Todos</option></select></div>
+      <div class="fld"><label>Mostrar</label><select id="fColStatus"><option value="ativos">Somente ativos</option><option value="todos">Todos</option><option value="vencidos">Vencidos (uniforme a trocar)</option></select></div>
       <div class="fld"><label>Buscar nome</label><input type="text" id="fColBusca" placeholder="nome do colaborador"></div>
     </div>
+    <div class="note">Clique no nome do colaborador para ver os uniformes recebidos e o prazo de troca (1 ano geral, 6 meses para Cozinha e Bar).</div>
     <table><thead><tr><th>Nome completo</th><th>Função</th><th>Unidade</th><th>Tamanho</th><th>Status</th><th>Admissão</th></tr></thead>
     <tbody id="tblColaboradores"></tbody></table>
   </div>
 
 </main>
 
+</div>
+
+<div class="modal-backdrop hidden" id="modalColaborador">
+  <div class="modal-box">
+    <h2 id="colabModalNome">Colaborador</h2>
+    <div class="sub" id="colabModalInfo"></div>
+    <div id="colabModalAlerta"></div>
+    <h2 style="font-size:14px;margin-top:18px;">Uniformes recebidos</h2>
+    <div id="colabModalHistorico"></div>
+    <div style="text-align:right;margin-top:16px;display:flex;gap:8px;justify-content:flex-end;">
+      <button class="secondary" id="btnSolicitarTrocaModal">Solicitar troca</button>
+      <button class="secondary" id="btnFecharColabModal">Fechar</button>
+    </div>
+  </div>
 </div>
 
 <div class="modal-backdrop hidden" id="modalAcessos">
@@ -397,6 +447,26 @@ function num(v){ const n = Number(v); return isNaN(n) ? 0 : n; }
 function uniq(arr, key){ return [...new Set(arr.map(r=>r[key]).filter(v=>v!==undefined && v!==''))]; }
 function esc(v){ return (v===undefined||v===null) ? '' : String(v); }
 function hoje(){ return new Date().toISOString().slice(0,10); }
+function formatarData(v){
+  if(!v) return '-';
+  const s = String(v).slice(0,10);
+  const partes = s.split('-');
+  return partes.length===3 ? `${partes[2]}/${partes[1]}/${partes[0]}` : s;
+}
+function diasDesde(v){
+  if(!v) return null;
+  const d = new Date(String(v).slice(0,10) + 'T12:00:00');
+  if(isNaN(d.getTime())) return null;
+  return Math.floor((Date.now() - d.getTime()) / (1000*60*60*24));
+}
+function prazoTrocaDias(funcao){
+  return (funcao==='Cozinha' || funcao==='Bar') ? 182 : 365;
+}
+function estaVencido(colaborador){
+  const dias = diasDesde(colaborador['DataAdmissao']);
+  if(dias===null) return false;
+  return dias >= prazoTrocaDias(colaborador['Funcao']);
+}
 
 /* ======================= LOGIN / SESSÃO ======================= */
 let CURRENT_USER = null;
@@ -468,6 +538,25 @@ function ativarAba(view){
   document.getElementById('view-' + view).classList.add('active');
 }
 
+/* Cards do Painel são clicáveis: levam pra Estoque (já filtrado) ou Pendências. */
+document.getElementById('painelStats').addEventListener('click', (e)=>{
+  const card = e.target.closest('.stat');
+  if(!card) return;
+  const action = card.dataset.action;
+  if(action==='estoque-todos' || action==='estoque-baixo' || action==='estoque-zerado'){
+    const val = action==='estoque-todos' ? '' : (action==='estoque-baixo' ? 'baixo' : 'zerado');
+    document.getElementById('fEstStatus').value = val;
+    ativarAba('estoque');
+    renderEstoqueTable();
+  } else if(action==='pend-entrega'){
+    ativarAba('pendencias');
+    document.getElementById('listaPendEntrega').scrollIntoView({behavior:'smooth', block:'start'});
+  } else if(action==='pend-devolucao'){
+    ativarAba('pendencias');
+    document.getElementById('listaPendDevolucao').scrollIntoView({behavior:'smooth', block:'start'});
+  }
+});
+
 function renderAll(){
   renderPainel();
   renderEstoqueFiltros();
@@ -475,6 +564,8 @@ function renderAll(){
   renderCatalogoFiltros();
   renderCatalogoTable();
   renderFormFiltros();
+  renderTrocaFiltros();
+  renderTrocaHistorico();
   renderPendEntrega();
   renderPendDevolucao();
   atualizarBadgePend();
@@ -489,7 +580,7 @@ function agruparPendencias(status){
   DATA.movimentacoes.filter(m=>m['Status']===status).forEach(m=>{
     const key = m['Colaborador'] + '||' + m['Funcao'] + '||' + m['Unidade'];
     if(!mapa[key]) mapa[key] = { colaborador:m['Colaborador'], funcao:m['Funcao'], unidade:m['Unidade'], tamanho:m['Tamanho'], itens:[] };
-    mapa[key].itens.push({ peca:m['Peca'], quantidade:num(m['Quantidade']), row:m['__row'], tamanho:m['Tamanho'] });
+    mapa[key].itens.push({ peca:m['Peca'], quantidade:num(m['Quantidade']), row:m['__row'], tamanho:m['Tamanho'], dataPrevista:m['Timestamp'], tipo:m['Tipo'] });
   });
   return Object.values(mapa);
 }
@@ -513,11 +604,11 @@ function renderPainel(){
   const itensPendDev = pendDev.reduce((s,g)=>s+g.itens.length,0);
 
   document.getElementById('painelStats').innerHTML = `
-    <div class="stat"><div class="num">${totalPecas}</div><div class="lbl">Peças em estoque</div></div>
-    <div class="stat warn"><div class="num">${baixo.length}</div><div class="lbl">Abaixo do mínimo</div></div>
-    <div class="stat bad"><div class="num">${zerado.length}</div><div class="lbl">Zerados</div></div>
-    <div class="stat pend"><div class="num">${pendEnt.length}</div><div class="lbl">Pendências de entrega</div></div>
-    <div class="stat pend"><div class="num">${pendDev.length}</div><div class="lbl">Pendências de devolução</div></div>
+    <div class="stat" data-action="estoque-todos"><div class="num">${totalPecas}</div><div class="lbl">Peças em estoque</div></div>
+    <div class="stat warn" data-action="estoque-baixo"><div class="num">${baixo.length}</div><div class="lbl">Abaixo do mínimo</div></div>
+    <div class="stat bad" data-action="estoque-zerado"><div class="num">${zerado.length}</div><div class="lbl">Zerados</div></div>
+    <div class="stat pend" data-action="pend-entrega"><div class="num">${pendEnt.length}</div><div class="lbl">Pendências de entrega</div></div>
+    <div class="stat pend" data-action="pend-devolucao"><div class="num">${pendDev.length}</div><div class="lbl">Pendências de devolução</div></div>
   `;
   document.getElementById('painelBanner').innerHTML = '';
 
@@ -549,17 +640,21 @@ function renderEstoqueFiltros(){
   if(uSel.options.length<=1){
     uniq(DATA.estoque,'Unidade').sort().forEach(u=>uSel.insertAdjacentHTML('beforeend', `<option value="${u}">${u}</option>`));
     uniq(DATA.estoque,'Cor').sort().forEach(c=>cSel.insertAdjacentHTML('beforeend', `<option value="${c}">${c}</option>`));
-    [uSel,cSel,document.getElementById('fEstBusca')].forEach(el=>el.addEventListener('input', renderEstoqueTable));
+    [uSel,cSel,document.getElementById('fEstStatus'),document.getElementById('fEstBusca')].forEach(el=>el.addEventListener('input', renderEstoqueTable));
   }
 }
 function renderEstoqueTable(){
   const u = document.getElementById('fEstUnidade').value;
   const c = document.getElementById('fEstCor').value;
+  const st = document.getElementById('fEstStatus').value;
   const q = document.getElementById('fEstBusca').value.toLowerCase();
-  const rows = DATA.estoque.filter(r=>
-    (!u || r['Unidade']===u) && (!c || r['Cor']===c) &&
-    (!q || String(r['Peca']||'').toLowerCase().includes(q))
-  );
+  const rows = DATA.estoque.filter(r=>{
+    const saldo = num(r['Saldo Atual']); const min = num(r['Estoque Minimo']);
+    let statusKey = 'ok';
+    if(saldo<=0) statusKey='zerado'; else if(saldo<=min) statusKey='baixo';
+    return (!u || r['Unidade']===u) && (!c || r['Cor']===c) && (!st || statusKey===st) &&
+      (!q || String(r['Peca']||'').toLowerCase().includes(q));
+  });
   document.getElementById('tblEstoque').innerHTML = rows.length ? rows.map(r=>{
     const saldo = num(r['Saldo Atual']); const min = num(r['Estoque Minimo']);
     let tag = 'ok', label='OK';
@@ -657,10 +752,19 @@ function renderKitEntrega(){
     const stockTxt = it.est ? `saldo atual: ${saldo}` : 'peça sem item cadastrado no Estoque';
     return `<div class="kit-item" data-idx="${i}">
       <span><input type="checkbox" class="kitChk" data-idx="${i}" checked> ${it.peca} <span class="stockinfo">(${stockTxt})</span></span>
-      <span class="qty">Qtd: <input type="number" min="1" class="kitQty" data-idx="${i}" value="${it.qtdPadrao}"></span>
+      <span class="qty">Tam: <input type="text" class="kitTam" data-idx="${i}" value="${esc(tamanho)}" style="width:60px;"> Qtd: <input type="number" min="1" class="kitQty" data-idx="${i}" value="${it.qtdPadrao}"></span>
     </div>`;
   }).join('');
   kitAtualEntrega = itens;
+  area.querySelectorAll('.kitTam').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      const idx = Number(inp.dataset.idx);
+      const it2 = kitAtualEntrega[idx];
+      const est2 = acharEstoquePorPeca(it2.peca, inp.value.trim());
+      const stockSpan = inp.closest('.kit-item').querySelector('.stockinfo');
+      if(stockSpan) stockSpan.textContent = est2 ? `(saldo atual: ${num(est2['Saldo Atual'])})` : '(peça sem item cadastrado no Estoque)';
+    });
+  });
   atualizarBotaoEntrega();
 }
 function atualizarBotaoEntrega(){
@@ -682,8 +786,10 @@ async function confirmarPendenciaEntrega(){
     const idx = Number(chk.dataset.idx);
     const info = kitAtualEntrega[idx];
     const qtyInput = document.querySelector(`#entKitArea .kitQty[data-idx="${idx}"]`);
+    const tamInput = document.querySelector(`#entKitArea .kitTam[data-idx="${idx}"]`);
     const qtd = Number(qtyInput.value) || 1;
-    itens.push({ peca: info.peca, quantidade: qtd, tamanho });
+    const tamanhoItem = tamInput ? tamInput.value.trim() : tamanho;
+    itens.push({ peca: info.peca, quantidade: qtd, tamanho: tamanhoItem });
   });
   if(!itens.length){ msg.textContent = 'Selecione ao menos uma peça.'; return; }
   document.getElementById('btnRegistrarPendEntrega').disabled = true;
@@ -723,7 +829,7 @@ function renderKitRescisao(){
   area.innerHTML = itens.map((it,i)=>`
     <div class="kit-item" data-idx="${i}">
       <span><input type="checkbox" class="rscChk" data-idx="${i}" checked> ${it.peca}</span>
-      <span class="qty">Qtd esperada: <input type="number" min="1" class="rscQty" data-idx="${i}" value="${it.qtdPadrao}"></span>
+      <span class="qty">Tam: <input type="text" class="rscTam" data-idx="${i}" value="${esc(tamanho)}" style="width:60px;"> Qtd esperada: <input type="number" min="1" class="rscQty" data-idx="${i}" value="${it.qtdPadrao}"></span>
     </div>`).join('');
   kitAtualRescisao = itens;
   atualizarBotaoRescisao();
@@ -747,8 +853,10 @@ async function confirmarPendenciaDevolucao(){
     const idx = Number(chk.dataset.idx);
     const info = kitAtualRescisao[idx];
     const qtyInput = document.querySelector(`#rscKitArea .rscQty[data-idx="${idx}"]`);
+    const tamInput = document.querySelector(`#rscKitArea .rscTam[data-idx="${idx}"]`);
     const qtd = Number(qtyInput.value) || 1;
-    itens.push({ peca: info.peca, quantidade: qtd, tamanho });
+    const tamanhoItem = tamInput ? tamInput.value.trim() : tamanho;
+    itens.push({ peca: info.peca, quantidade: qtd, tamanho: tamanhoItem });
   });
   if(!itens.length){ msg.textContent = 'Selecione ao menos uma peça.'; return; }
   document.getElementById('btnRegistrarPendDevolucao').disabled = true;
@@ -767,6 +875,65 @@ async function confirmarPendenciaDevolucao(){
   atualizarBotaoRescisao();
 }
 
+/* ======================= SOLICITAÇÕES DE TROCA ======================= */
+function renderTrocaFiltros(){
+  const colSel = document.getElementById('trcColaborador');
+  const pecaSel = document.getElementById('trcPeca');
+  if(!colSel.dataset.bound){
+    uniq(DATA.estoque,'Peca').sort().forEach(p=>pecaSel.insertAdjacentHTML('beforeend', `<option value="${p}">${p}</option>`));
+    colSel.addEventListener('change', atualizarTrocaColaborador);
+    document.getElementById('btnRegistrarTroca').addEventListener('click', registrarTroca);
+    document.getElementById('trcDataPrevista').value = hoje();
+    colSel.dataset.bound = '1';
+  }
+  const atual = colSel.value;
+  colSel.innerHTML = '<option value="">Selecione</option>' + DATA.colaboradores
+    .filter(c=>String(c['Status']||'').indexOf('Ativo')===0)
+    .sort((a,b)=>String(a['Nome']).localeCompare(String(b['Nome'])))
+    .map(c=>`<option value="${esc(c['Nome'])}">${esc(c['Nome'])}</option>`).join('');
+  if(atual) colSel.value = atual;
+}
+function atualizarTrocaColaborador(){
+  const nome = document.getElementById('trcColaborador').value;
+  const c = DATA.colaboradores.find(x=>x['Nome']===nome);
+  if(c && !document.getElementById('trcTamanho').value.trim()){
+    document.getElementById('trcTamanho').value = c['Tamanho']||'';
+  }
+}
+async function registrarTroca(){
+  const colaborador = document.getElementById('trcColaborador').value;
+  const peca = document.getElementById('trcPeca').value;
+  const tamanho = document.getElementById('trcTamanho').value.trim();
+  const quantidade = Number(document.getElementById('trcQtd').value) || 1;
+  const motivo = document.getElementById('trcMotivo').value;
+  const dataPrevista = document.getElementById('trcDataPrevista').value;
+  const obs = document.getElementById('trcObs').value.trim();
+  const msg = document.getElementById('trcMsg');
+  if(!colaborador || !peca){ msg.textContent = 'Selecione o colaborador e a peça.'; return; }
+  const c = DATA.colaboradores.find(x=>x['Nome']===colaborador);
+  document.getElementById('btnRegistrarTroca').disabled = true;
+  msg.textContent = 'Salvando na planilha…';
+  try{
+    await apiPost({ action:'registrarSolicitacaoTroca', colaborador, funcao: c?c['Funcao']:'', unidade: c?c['Unidade']:'', peca, tamanho, quantidade, motivo, dataPrevista, observacoes: obs, registradoPor: CURRENT_USER.nome });
+    msg.textContent = '✔ Solicitação registrada. Já aparece na aba Pendências.';
+    document.getElementById('trcObs').value='';
+    document.getElementById('trcQtd').value='1';
+    await carregarTudo();
+    ativarAba('pendencias');
+  }catch(err){
+    msg.textContent = 'Erro ao salvar: ' + err.message;
+  }
+  document.getElementById('btnRegistrarTroca').disabled = false;
+}
+function renderTrocaHistorico(){
+  const rows = DATA.movimentacoes.filter(m=>/^Troca de Uniforme/.test(String(m['Tipo']||''))).slice().reverse();
+  document.getElementById('tblTroca').innerHTML = rows.length ? rows.map(m=>{
+    const st = String(m['Status']||'');
+    const tag = /Pendente/.test(st) ? 'pend' : (/Entregue/.test(st) ? 'ok' : 'neutral');
+    return `<tr><td>${formatarData(m['Timestamp'])}</td><td>${esc(m['Colaborador'])}</td><td>${esc(m['Peca'])}</td><td>${esc(m['Tamanho'])}</td><td>${esc(m['Quantidade'])}</td><td>${esc(String(m['Tipo']||'').replace('Troca de Uniforme - ',''))}</td><td><span class="tag ${tag}">${esc(st)}</span></td></tr>`;
+  }).join('') : '<tr><td colspan="7" class="empty">Nenhuma solicitação de troca registrada ainda.</td></tr>';
+}
+
 /* ======================= PENDÊNCIAS (checklist item a item) ======================= */
 function renderPendEntrega(){
   const grupos = agruparPendencias('Pendente Entrega');
@@ -781,9 +948,11 @@ function renderPendEntrega(){
         const est = acharEstoquePorPeca(it.peca, it.tamanho);
         const saldo = est ? num(est['Saldo Atual']) : 0;
         const semEstoque = saldo <= 0;
+        const isTroca = /^Troca de Uniforme/.test(it.tipo||'');
+        const dataTxt = formatarData(it.dataPrevista);
         return `<div class="itemline">
           <span class="left"><input type="checkbox" class="itChk" data-gi="${gi}" data-ii="${ii}" ${semEstoque?'':'checked'}>
-            ${esc(it.peca)} <span class="stockinfo">${semEstoque ? '(sem estoque agora)' : '(saldo atual: '+saldo+')'}</span></span>
+            ${esc(it.peca)} ${isTroca?'<span class="tag info">Troca</span>':''} <span class="stockinfo">${semEstoque ? '(sem estoque agora)' : '(saldo atual: '+saldo+')'} · previsto: ${dataTxt}</span></span>
           <span class="right">pedido: ${it.quantidade} · entregar agora: <input type="number" class="itQty" data-gi="${gi}" data-ii="${ii}" min="0" max="${it.quantidade}" value="${Math.min(it.quantidade, Math.max(saldo,0))}"></span>
         </div>`;
       }).join('')}
@@ -804,7 +973,7 @@ function renderPendDevolucao(){
       </div>
       ${g.itens.map((it,ii)=>`
         <div class="itemline">
-          <span class="left"><input type="checkbox" class="itChkDev" data-gi="${gi}" data-ii="${ii}" checked> ${esc(it.peca)}</span>
+          <span class="left"><input type="checkbox" class="itChkDev" data-gi="${gi}" data-ii="${ii}" checked> ${esc(it.peca)} <span class="stockinfo">previsto: ${formatarData(it.dataPrevista)}</span></span>
           <span class="right">esperado: ${it.quantidade} · devolvido agora: <input type="number" class="itQtyDev" data-gi="${gi}" data-ii="${ii}" min="0" max="${it.quantidade}" value="${it.quantidade}"></span>
         </div>`).join('')}
     </div>
@@ -913,20 +1082,61 @@ function renderColaboradoresFiltros(){
 }
 function renderColaboradores(){
   const u = document.getElementById('fColUnidade').value;
-  const somenteAtivos = document.getElementById('fColStatus').value === 'ativos';
+  const statusFiltro = document.getElementById('fColStatus').value;
   const q = document.getElementById('fColBusca').value.toLowerCase();
-  const rows = DATA.colaboradores.filter(r=>
-    (!u || r['Unidade']===u) &&
-    (!somenteAtivos || String(r['Status']||'').indexOf('Ativo')===0) &&
-    (!q || String(r['Nome']||'').toLowerCase().includes(q))
-  );
+  const rows = DATA.colaboradores.filter(r=>{
+    if(u && r['Unidade']!==u) return false;
+    if(q && !String(r['Nome']||'').toLowerCase().includes(q)) return false;
+    if(statusFiltro==='ativos' && String(r['Status']||'').indexOf('Ativo')!==0) return false;
+    if(statusFiltro==='vencidos' && !estaVencido(r)) return false;
+    return true;
+  });
   document.getElementById('tblColaboradores').innerHTML = rows.length ? rows.map(r=>{
     const status = String(r['Status']||'');
     const tag = status.indexOf('Ativo')===0 ? 'ok' : (status.indexOf('aguardando')>-1 || status.indexOf('pendente')>-1 ? 'pend' : 'neutral');
-    return `<tr><td>${esc(r['Nome'])}</td><td>${esc(r['Funcao'])}</td><td>${esc(r['Unidade'])}</td><td>${esc(r['Tamanho'])}</td>
-    <td><span class="tag ${tag}">${esc(status)}</span></td><td>${(r['DataAdmissao']||'').toString().slice(0,10)}</td></tr>`;
+    const vencido = estaVencido(r);
+    return `<tr class="colabRow" data-nome="${esc(r['Nome'])}" style="cursor:pointer;"><td>${esc(r['Nome'])}</td><td>${esc(r['Funcao'])}</td><td>${esc(r['Unidade'])}</td><td>${esc(r['Tamanho'])}</td>
+    <td><span class="tag ${tag}">${esc(status)}</span>${vencido?' <span class="tag bad">Vencido</span>':''}</td><td>${(r['DataAdmissao']||'').toString().slice(0,10)}</td></tr>`;
   }).join('') : '<tr><td colspan="6" class="empty">Nenhum colaborador encontrado.</td></tr>';
+  document.querySelectorAll('#tblColaboradores .colabRow').forEach(tr=>{
+    tr.addEventListener('click', ()=>abrirModalColaborador(tr.dataset.nome));
+  });
 }
+
+function abrirModalColaborador(nome){
+  const c = DATA.colaboradores.find(x=>x['Nome']===nome);
+  if(!c) return;
+  document.getElementById('modalColaborador').dataset.nomeAtual = nome;
+  document.getElementById('colabModalNome').textContent = c['Nome'];
+  document.getElementById('colabModalInfo').textContent = (c['Funcao']||'-') + ' · ' + (c['Unidade']||'-') + ' · Tamanho: ' + (c['Tamanho']||'-') + ' · Status: ' + (c['Status']||'-');
+  const dias = diasDesde(c['DataAdmissao']);
+  const prazo = prazoTrocaDias(c['Funcao']);
+  const prazoTxt = prazo===182 ? '6 meses (Cozinha/Bar)' : '1 ano';
+  const alertaEl = document.getElementById('colabModalAlerta');
+  if(dias!==null && dias>=prazo){
+    alertaEl.innerHTML = `<div class="banner bad">⚠ Uniforme vencido — ${dias} dias desde a admissão (prazo: ${prazoTxt}). Providenciar troca.</div>`;
+  } else if(dias!==null){
+    alertaEl.innerHTML = `<div class="banner info">Dentro do prazo — ${dias} dias desde a admissão (prazo: ${prazoTxt}).</div>`;
+  } else {
+    alertaEl.innerHTML = '';
+  }
+  const hist = DATA.movimentacoes.filter(m=>m['Colaborador']===nome && /Entregue|Devolvido|Confirmado/.test(String(m['Status']||'')));
+  document.getElementById('colabModalHistorico').innerHTML = hist.length ? `<table><thead><tr><th>Data</th><th>Peça</th><th>Tam.</th><th>Qtd</th><th>Tipo</th></tr></thead><tbody>${
+    hist.map(m=>`<tr><td>${(m['Timestamp']||'').toString().replace('T',' ').slice(0,16)}</td><td>${esc(m['Peca'])}</td><td>${esc(m['Tamanho'])}</td><td>${esc(m['Quantidade'])}</td><td>${esc(m['Tipo'])}</td></tr>`).join('')
+  }</tbody></table>` : '<div class="empty">Nenhum uniforme registrado ainda.</div>';
+  document.getElementById('modalColaborador').classList.remove('hidden');
+}
+document.getElementById('btnFecharColabModal').addEventListener('click', ()=>{
+  document.getElementById('modalColaborador').classList.add('hidden');
+});
+document.getElementById('btnSolicitarTrocaModal').addEventListener('click', ()=>{
+  const nome = document.getElementById('modalColaborador').dataset.nomeAtual;
+  document.getElementById('modalColaborador').classList.add('hidden');
+  ativarAba('troca');
+  renderTrocaFiltros();
+  document.getElementById('trcColaborador').value = nome;
+  atualizarTrocaColaborador();
+});
 
 /* ======================= GERENCIAR ACESSOS ======================= */
 document.getElementById('btnGerenciarAcessos').addEventListener('click', abrirModalAcessos);
